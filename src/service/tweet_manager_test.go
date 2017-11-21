@@ -17,3 +17,16 @@ func TestPublishedTweetSaved(t *testing.T) {
 	}
 
 }
+
+func TestCleanTweet(t *testing.T) {
+
+	tweet := "This is my first tweet"
+
+	service.PublishTweet(tweet)
+	service.CleanTweet()
+
+	if service.GetTweet() != "" {
+		t.Error("Expected empty string")
+	}
+
+}

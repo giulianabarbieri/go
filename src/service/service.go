@@ -8,3 +8,6 @@ func PublishTweet(newTweet string) {
 func GetTweet() string {
 	return tweet
 }
+func CleanTweet() {
+	tweet = ""
+}
