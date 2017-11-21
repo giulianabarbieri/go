@@ -1,13 +1,16 @@
 package service
 
-var tweet string
+import "github.com/go/src/domain"
 
-func PublishTweet(newTweet string) {
+var tweet *domain.Tweet
+
+//la estructura ES el tipo
+func PublishTweet(newTweet *domain.Tweet) {
 	tweet = newTweet
 }
-func GetTweet() string {
+func GetTweet() *domain.Tweet {
 	return tweet
 }
 func CleanTweet() {
-	tweet = ""
+	//tweet = ""
 }
