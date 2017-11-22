@@ -25,7 +25,7 @@ func main() {
 			message := c.ReadLine()
 
 			tweet := domain.NewTweet(username, message)
-			err := service.PublishTweet(tweet)
+			_, err := service.PublishTweet(tweet)
 			if err != nil {
 				c.Print("An error has ocurred, tweet not published")
 				return
@@ -63,6 +63,19 @@ func main() {
 
 			return
 		},
+	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "ShowAllTweets",
+		Help: "te muestra TODO ",
+		Func: func(c *ishell.Context) { //que queremos ejecutar cuando alquien escriba el comando
+
+			defer c.ShowPrompt(true)
+
+			c.Print(service.GetTweets())
+
+			return
+		}, //publicar tweet
 	})
 	shell.Run()
 }
