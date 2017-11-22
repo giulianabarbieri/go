@@ -7,12 +7,13 @@ var tweet *domain.Tweet
 
 //la estructura ES el tipo
 func PublishTweet(newTweet *domain.Tweet) error {
-	var err error = nil
+
 	if newTweet.User == "" {
-		err = fmt.Errorf("user is required")
+		return fmt.Errorf("user is required")
 	}
+
 	tweet = newTweet
-	return err
+	return nil
 }
 
 func GetTweet() *domain.Tweet {
