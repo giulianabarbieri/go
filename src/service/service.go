@@ -4,6 +4,16 @@ import "github.com/go/src/domain"
 import "fmt"
 
 var tweet *domain.Tweet
+var allTweets []*domain.Tweet
+
+func InitializeService() {
+	allTweets = make([]*domain.Tweet, 0)
+}
+
+func GetTweets() []*domain.Tweet {
+
+	return allTweets
+}
 
 //la estructura ES el tipo
 func PublishTweet(newTweet *domain.Tweet) error {
@@ -19,6 +29,7 @@ func PublishTweet(newTweet *domain.Tweet) error {
 	}
 
 	tweet = newTweet
+	allTweets = append(allTweets, newTweet)
 	return nil
 }
 
