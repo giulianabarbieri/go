@@ -12,5 +12,5 @@ func GetTweet() *domain.Tweet {
 	return tweet
 }
 func CleanTweet() {
-	//tweet = ""
+	tweet = nil
 }
