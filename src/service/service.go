@@ -7,7 +7,7 @@ var tweet *domain.Tweet
 
 //la estructura ES el tipo
 func PublishTweet(newTweet *domain.Tweet) error {
-	var err error
+	var err error = nil
 	if newTweet.User == "" {
 		err = fmt.Errorf("user is required")
 	}
