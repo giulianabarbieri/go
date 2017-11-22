@@ -68,3 +68,26 @@ func TestTweetWhithoutUserIsNotPublished(t *testing.T) {
 		t.Error("Expected error is user is required")
 	}
 }
+func TestTweetWhithoutTextIsNotPublished(t *testing.T) {
+	//inicialization
+	var tweet *domain.Tweet
+
+	user := "El grupo del canal cultural"
+	var text string
+
+	tweet = domain.NewTweet(user, text)
+
+	//operation
+	var err error
+	err = service.PublishTweet(tweet)
+
+	//validation
+	if err == nil {
+		t.Error("Expected error")
+		return
+	}
+
+	if err.Error() != "text is required" {
+		t.Error("Expected error is text is requered")
+	}
+}

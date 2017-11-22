@@ -11,6 +11,9 @@ func PublishTweet(newTweet *domain.Tweet) error {
 	if newTweet.User == "" {
 		return fmt.Errorf("user is required")
 	}
+	if newTweet.Text == "" {
+		return fmt.Errorf("text is required")
+	}
 
 	tweet = newTweet
 	return nil

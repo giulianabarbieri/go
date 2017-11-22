@@ -25,8 +25,11 @@ func main() {
 			message := c.ReadLine()
 
 			tweet := domain.NewTweet(username, message)
-
-			service.PublishTweet(tweet)
+			err := service.PublishTweet(tweet)
+			if err != nil {
+				c.Print("An error has ocurred, tweet not published")
+				return
+			}
 
 			c.Print("Tweet sent\n")
 
