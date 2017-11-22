@@ -153,7 +153,8 @@ func TestCanPublishAndRetrieveMoreThanOneTweet(t *testing.T) {
 func isValidTweet(t *testing.T, tweet *domain.Tweet, id int, user, text string) bool {
 
 	if tweet.Id != id {
-		t.Errorf("Expected id is $v but was %v, id, tweet.Id")
+		t.Errorf("Expected id is %v but was %v",
+			id, tweet.Id)
 	}
 
 	if tweet.User != user && tweet.Text != text {

@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-var Id int = 0
+var nextId int = 0
 
 //define una estructura
 type Tweet struct {
@@ -22,8 +22,8 @@ func NewTweet(user, text string) *Tweet { //pongo *tweet porque estoy en domain,
 		user,
 		text,
 		&date, //es un puntero
-		Id,
+		nextId,
 	} //parece ser una variable local pero NO = magia
-	Id++
+	nextId++
 	return &tweet //el & para el puntero
 }

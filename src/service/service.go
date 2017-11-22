@@ -27,7 +27,7 @@ func PublishTweet(newTweet *domain.Tweet) (int, error) {
 		return 0, fmt.Errorf("text exceeds 140 characters")
 	}
 	allTweets = append(allTweets, newTweet)
-	return 0, nil
+	return newTweet.Id, nil
 }
 
 func GetTweet() *domain.Tweet {
