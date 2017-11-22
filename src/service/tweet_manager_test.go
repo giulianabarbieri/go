@@ -50,3 +50,21 @@ func TestPublishedTweetIsSaved(t *testing.T) {
 		t.Error("Expected date can't be nil")
 	}
 }
+func TestTweetWhithoutUserIsNotPublished(t *testing.T) {
+	//inicialization
+	var tweet *domain.Tweet
+
+	var user string
+	text := "This is my first tweet"
+
+	tweet = domain.NewTweet(user, text)
+
+	//operation
+	var err error
+	err = service.PublishTweet(tweet)
+
+	//validation
+	if err != nil && err.Error() != "user is required" {
+		t.Error("Expected error is user is required")
+	}
+}
