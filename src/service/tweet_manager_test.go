@@ -8,32 +8,22 @@ import (
 	"github.com/go/src/service"
 )
 
-/*
-func TestPublishedTweetSaved(t *testing.T) {
-
-	tweet := "This is my first tweet"
-
-	service.PublishTweet(tweet)
-
-	if service.GetTweet() != tweet {
-		t.Error("Expected tweet is", tweet)
-	}
-
-}
-
-
 func TestCleanTweet(t *testing.T) {
 
-	tweet := "This is my first tweet"
+	var tweet *domain.Tweet //Tweet es el nombre de la estructura!!
+
+	user := "grupoesfera"
+	text := "hello"
+	tweet = domain.NewTweet(user, text)
 
 	service.PublishTweet(tweet)
 	service.CleanTweet()
 
-	if service.GetTweet() != "" {
+	if service.GetTweet() != nil {
 		t.Error("Expected empty string")
 	}
 
-} */
+}
 
 func TestPublishedTweetIsSaved(t *testing.T) {
 	//inicialization
