@@ -77,5 +77,21 @@ func main() {
 			return
 		}, //publicar tweet
 	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "CountUserTweets",
+		Help: "Cuenta los tweets de un usuario ",
+		Func: func(c *ishell.Context) { //que queremos ejecutar cuando alquien escriba el comando
+
+			defer c.ShowPrompt(true)
+
+			c.Print("Write your username: ")
+			username := c.ReadLine()
+
+			c.Print(service.CountTweetsByUser(username))
+
+			return
+		}, //publicar tweet
+	})
 	shell.Run()
 }
