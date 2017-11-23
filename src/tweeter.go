@@ -128,5 +128,40 @@ func main() {
 			return
 		},
 	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "Follow",
+		Help: "sigue a un usuario ",
+		Func: func(c *ishell.Context) {
+
+			defer c.ShowPrompt(true)
+
+			c.Print("Write your username: ")
+			username := c.ReadLine()
+			c.Print("Write their username: ")
+			usernameToFollow := c.ReadLine()
+
+			service.Follow(username, usernameToFollow)
+			c.Print("followed")
+
+			return
+		},
+	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "GetTimeLine",
+		Help: "obtiene el timeline de un usario ",
+		Func: func(c *ishell.Context) {
+
+			defer c.ShowPrompt(true)
+
+			c.Print("Write your username: ")
+			username := c.ReadLine()
+
+			c.Print(service.GetTimeLine(username))
+
+			return
+		},
+	})
 	shell.Run()
 }

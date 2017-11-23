@@ -27,3 +27,7 @@ func NewTweet(user, text string) *Tweet { //pongo *tweet porque estoy en domain,
 	nextId++
 	return &tweet //el & para el puntero
 }
+
+func ResetId() {
+	nextId = 0
+}
