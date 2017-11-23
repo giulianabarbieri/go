@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strconv"
+
 	"github.com/abiosoft/ishell"
 	"github.com/go/src/domain"
 	"github.com/go/src/service"
@@ -92,6 +94,39 @@ func main() {
 
 			return
 		}, //publicar tweet
+	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "GetTweetById",
+		Help: "Obtiene tweeter con su identificacion unica ",
+		Func: func(c *ishell.Context) { //que queremos ejecutar cuando alquien escriba el comando
+
+			defer c.ShowPrompt(true)
+
+			c.Print("Write Id: ")
+			idstr := c.ReadLine()
+			id, _ := strconv.Atoi(idstr)
+
+			c.Print(service.GetTweetById(id))
+
+			return
+		}, //publicar tweet
+	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "GetTweetsByUser",
+		Help: "Obtiene los tweets por usuario ",
+		Func: func(c *ishell.Context) {
+
+			defer c.ShowPrompt(true)
+
+			c.Print("Write username: ")
+			username := c.ReadLine()
+
+			c.Print(service.GetTweetsByUser(username))
+
+			return
+		},
 	})
 	shell.Run()
 }

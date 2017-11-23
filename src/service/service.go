@@ -3,7 +3,7 @@ package service
 import "github.com/go/src/domain"
 import "fmt"
 
-var allTweets map[string][]*domain.Tweet
+var allTweets map[string][]*domain.Tweet = make(map[string][]*domain.Tweet)
 var lastTweet *domain.Tweet
 
 func InitializeService() {
@@ -39,6 +39,9 @@ func PublishTweet(newTweet *domain.Tweet) (int, error) {
 }
 
 func GetTweet() *domain.Tweet {
+	if len(allTweets) == 0 {
+		return nil //HACER ESTO DE UN TEST
+	}
 	return lastTweet
 }
 
