@@ -54,7 +54,7 @@ func (manager *TweetManager) PublishTweet(newTweet *domain.Tweet) (int, error) {
 	}
 
 	manager.addWordsToCounter(newTweet)
-	manager.allTweets[newTweet.User] = append(manager.allTweets[newTweet.User], newTweet)
+	manager.addTweetToUser(newTweet, newTweet.User)
 	manager.lastTweet = newTweet
 	return newTweet.Id, nil
 }
@@ -190,10 +190,12 @@ func (manager *TweetManager) GetAllDirectMessages(user string) []*domain.Tweet {
 	return manager.allDirectMessages[user]
 }
 
+//GetUnreadDirectMessages obtiene los mensajes sin leer de un usuario
 func (manager *TweetManager) GetUnreadDirectMessages(user string) []*domain.Tweet {
 	return manager.unreadDirectMessages[user]
 }
 
+//ReadDirectMessage marca un mensaje como leido
 func (manager *TweetManager) ReadDirectMessage(tweet *domain.Tweet, user string) {
 	unreadDirectMessages, _ := manager.unreadDirectMessages[user]
 	for index, directMessage := range unreadDirectMessages {
@@ -201,4 +203,13 @@ func (manager *TweetManager) ReadDirectMessage(tweet *domain.Tweet, user string)
 			manager.unreadDirectMessages[user] = append(unreadDirectMessages[:index], unreadDirectMessages[index+1:]...)
 		}
 	}
+}
+
+//Retweet hace que el tweet aparezca dentro de mis tweets
+func (manager *TweetManager) Retweet(tweet *domain.Tweet, user string) {
+	manager.addTweetToUser(tweet, user)
+}
+
+func (manager *TweetManager) addTweetToUser(tweet *domain.Tweet, user string) {
+	manager.allTweets[user] = append(manager.allTweets[user], tweet)
 }

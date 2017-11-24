@@ -376,3 +376,28 @@ func TestCanReadADirectMessage(t *testing.T) {
 
 	isValidTweet(t, raulsDirectMessages[0], id1, joaquin, msg1)
 }
+
+func TestCanRetweetSomeone(t *testing.T) {
+	// Initialization
+	tweetManager := service.NewTweetManager()
+
+	user := "joaquin"
+	userToRetweet := "raul"
+	text := "This is a tweet to retweet"
+
+	tweet := domain.NewTweet(userToRetweet, text)
+	id, _ := tweetManager.PublishTweet(tweet)
+
+	// Operation
+	tweetManager.Retweet(tweet, user)
+
+	// Validation
+	myTweets := tweetManager.GetTweetsByUser(user)
+
+	if len(myTweets) != 1 {
+		t.Errorf("deberia tener 1 solo tweet, tiene %v", len(myTweets))
+		return
+	}
+
+	isValidTweet(t, myTweets[0], id, userToRetweet, text)
+}

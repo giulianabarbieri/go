@@ -257,5 +257,25 @@ func main() {
 		},
 	})
 
+	shell.AddCmd(&ishell.Cmd{
+		Name: "Retweet",
+		Help: "can retweet a tweetby id",
+		Func: func(c *ishell.Context) {
+
+			defer c.ShowPrompt(true)
+
+			c.Print("Write username:")
+			username := c.ReadLine()
+
+			c.Print("Write message id:")
+			messageidstr := c.ReadLine()
+			messageid, _ := strconv.Atoi(messageidstr)
+
+			tweetManager.Retweet(tweetManager.GetTweetByID(messageid), username)
+
+			return
+		},
+	})
+
 	shell.Run()
 }
