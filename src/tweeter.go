@@ -12,6 +12,9 @@ func main() {
 	shell := ishell.New() //new de la libreria
 	shell.SetPrompt("Tweeter >>")
 	shell.Print("Type 'help' to know commands \n")
+
+	tweetManager := service.NewTweetManager() //Creo el manager
+
 	//a la consola interactiva le agrega un comando
 	shell.AddCmd(&ishell.Cmd{
 		Name: "publishTweet",
@@ -27,7 +30,7 @@ func main() {
 			message := c.ReadLine()
 
 			tweet := domain.NewTweet(username, message)
-			_, err := service.PublishTweet(tweet)
+			_, err := tweetManager.PublishTweet(tweet)
 			if err != nil {
 				c.Print("An error has ocurred, tweet not published")
 				return
@@ -46,7 +49,7 @@ func main() {
 
 			defer c.ShowPrompt(true)
 
-			tweet := service.GetTweet()
+			tweet := tweetManager.GetTweet()
 
 			c.Print(tweet)
 
@@ -61,7 +64,7 @@ func main() {
 
 			defer c.ShowPrompt(true)
 
-			service.CleanTweet()
+			tweetManager.CleanTweet()
 
 			return
 		},
@@ -74,7 +77,7 @@ func main() {
 
 			defer c.ShowPrompt(true)
 
-			c.Print(service.GetTweets())
+			c.Print(tweetManager.GetTweets())
 
 			return
 		}, //publicar tweet
@@ -90,7 +93,7 @@ func main() {
 			c.Print("Write your username: ")
 			username := c.ReadLine()
 
-			c.Print(service.CountTweetsByUser(username))
+			c.Print(tweetManager.CountTweetsByUser(username))
 
 			return
 		}, //publicar tweet
@@ -107,7 +110,7 @@ func main() {
 			idstr := c.ReadLine()
 			id, _ := strconv.Atoi(idstr)
 
-			c.Print(service.GetTweetById(id))
+			c.Print(tweetManager.GetTweetByID(id))
 
 			return
 		}, //publicar tweet
@@ -123,7 +126,7 @@ func main() {
 			c.Print("Write username: ")
 			username := c.ReadLine()
 
-			c.Print(service.GetTweetsByUser(username))
+			c.Print(tweetManager.GetTweetsByUser(username))
 
 			return
 		},
@@ -141,7 +144,7 @@ func main() {
 			c.Print("Write their username: ")
 			usernameToFollow := c.ReadLine()
 
-			service.Follow(username, usernameToFollow)
+			tweetManager.Follow(username, usernameToFollow)
 			c.Print("followed")
 
 			return
@@ -158,10 +161,24 @@ func main() {
 			c.Print("Write your username: ")
 			username := c.ReadLine()
 
-			c.Print(service.GetTimeLine(username))
+			c.Print(tweetManager.GetTimeLine(username))
 
 			return
 		},
 	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "GetTrendingTopics",
+		Help: "obtiene el trending topic ",
+		Func: func(c *ishell.Context) {
+
+			defer c.ShowPrompt(true)
+
+			c.Print(tweetManager.GetTrendingTopic())
+
+			return
+		},
+	})
+
 	shell.Run()
 }

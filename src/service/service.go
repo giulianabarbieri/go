@@ -60,6 +60,7 @@ func (manager *TweetManager) GetTweet() *domain.Tweet {
 	return manager.lastTweet
 }
 
+//Hacer que se reduzcan las  palabras del contador para el TT
 //CleanTweet borra el ultimo tweet enviado
 func (manager *TweetManager) CleanTweet() {
 	//Testear bien que ser borre el tweet del map
@@ -75,9 +76,13 @@ func (manager *TweetManager) CleanTweet() {
 	manager.lastTweet = nil
 }
 
+//Hacer test de este metodo
 //CleanTweets borra todos los tweets
 func (manager *TweetManager) CleanTweets() {
 	manager.allTweets = make(map[string][]*domain.Tweet)
+	manager.lastTweet = nil
+	manager.wordCounter = make(map[string]int)
+	manager.userFollowing = make(map[string][]string)
 }
 
 //GetTweetByID obtiene el tweet con el id. Nil si no existe
@@ -117,6 +122,7 @@ func (manager *TweetManager) Follow(user1, user2 string) {
 	manager.userFollowing[user1] = append(usersFollowed, user2)
 }
 
+//Rehacer el tests de este metodo
 //GetTimeLine obtiene la timeline del user
 func (manager *TweetManager) GetTimeLine(user string) []*domain.Tweet {
 	followed := manager.userFollowing[user]
