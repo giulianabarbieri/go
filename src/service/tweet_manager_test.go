@@ -11,20 +11,20 @@ import (
 func TestPublishedTweetIsSaved(t *testing.T) {
 
 	// Initialization
-	tweetManager := service.NewTweetManager()
+	tweetManager := service.NewTweeterManager()
 
-	var tweet *domain.Tweet
+	var tweet domain.Tweeter
 
 	user := "grupoesfera"
 	text := "This is my first tweet"
 
-	tweet = domain.NewTweet(user, text)
+	tweet = domain.NewTextTweet(user, text)
 
 	// Operation
-	id, _ := tweetManager.PublishTweet(tweet)
+	id, _ := tweetManager.PublishTweeter(tweet)
 
 	// Validation
-	publishedTweet := tweetManager.GetTweet()
+	publishedTweet := tweetManager.GetTweeter()
 
 	isValidTweet(t, publishedTweet, id, user, text)
 }

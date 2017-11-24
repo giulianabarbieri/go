@@ -4,10 +4,10 @@ import "time"
 
 //QuoteTweet es un tweet que posee imagenes
 type QuoteTweet struct {
-	User        string
-	Text        string
+	UserATR     string
+	TextATR     string
 	Date        *time.Time
-	ID          int
+	IDATR       int
 	TweetQuoted Tweeter
 }
 
@@ -28,9 +28,9 @@ func NewQuoteTweet(user, text string, tweetToQuote Tweeter) *QuoteTweet {
 //PrintableTweet transforma tweet a texto
 func (tweet *QuoteTweet) PrintableTweet() string {
 	finalText := `@`
-	finalText = finalText + tweet.User
+	finalText = finalText + tweet.User()
 	finalText = finalText + `: `
-	finalText = finalText + tweet.Text + " "
+	finalText = finalText + tweet.Text() + " "
 
 	quotedText := tweet.TweetQuoted.PrintableTweet()
 
@@ -40,4 +40,15 @@ func (tweet *QuoteTweet) PrintableTweet() string {
 
 func (tweet *QuoteTweet) String() string {
 	return tweet.PrintableTweet()
+}
+
+func (tweet *QuoteTweet) User() string {
+	return tweet.UserATR
+}
+
+func (tweet *QuoteTweet) Text() string {
+	return tweet.TextATR
+}
+func (tweet *QuoteTweet) Id() int {
+	return tweet.IDATR
 }

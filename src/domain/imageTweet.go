@@ -4,10 +4,10 @@ import "time"
 
 //ImageTweet es un tweet que posee imagenes
 type ImageTweet struct {
-	User     string
-	Text     string
+	UserAtr  string
+	TextAtr  string
 	Date     *time.Time
-	ID       int
+	IDAtr    int
 	ImageURL string
 }
 
@@ -28,13 +28,24 @@ func NewImageTweet(user, text, imageURL string) *ImageTweet {
 //PrintableTweet transforma tweet a texto
 func (tweet *ImageTweet) PrintableTweet() string {
 	finalText := "@"
-	finalText = finalText + tweet.User
+	finalText = finalText + tweet.User()
 	finalText = finalText + ": "
-	finalText = finalText + tweet.Text
+	finalText = finalText + tweet.Text()
 	finalText = finalText + " " + tweet.ImageURL
 	return finalText
 }
 
 func (tweet *ImageTweet) String() string {
 	return tweet.PrintableTweet()
+}
+
+func (tweet *ImageTweet) User() string {
+	return tweet.UserAtr
+}
+
+func (tweet *ImageTweet) Text() string {
+	return tweet.TextAtr
+}
+func (tweet *ImageTweet) Id() int {
+	return tweet.IDAtr
 }
