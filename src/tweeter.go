@@ -180,5 +180,82 @@ func main() {
 		},
 	})
 
+	shell.AddCmd(&ishell.Cmd{
+		Name: "SendDirectMessage",
+		Help: "envia un tweet como mensaje directo",
+		Func: func(c *ishell.Context) {
+
+			defer c.ShowPrompt(true)
+
+			c.Print("Write your username: ")
+			username := c.ReadLine()
+
+			c.Print("Write your message:")
+			message := c.ReadLine()
+
+			tweet := domain.NewTweet(username, message)
+			c.Print("Write receiver of the message:")
+			receiver := c.ReadLine()
+
+			tweetManager.SendDirectMessage(tweet, receiver)
+
+			c.Print("Message sent\n")
+
+			return
+		},
+	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "GetAllDirectMEssages",
+		Help: "get all messages of user ",
+		Func: func(c *ishell.Context) {
+
+			defer c.ShowPrompt(true)
+
+			c.Print("Write username:")
+			username := c.ReadLine()
+
+			c.Print(tweetManager.GetAllDirectMessages(username))
+
+			return
+		},
+	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "GetUnreadDirectMessages",
+		Help: "get all unread messages of user ",
+		Func: func(c *ishell.Context) {
+
+			defer c.ShowPrompt(true)
+
+			c.Print("Write username:")
+			username := c.ReadLine()
+
+			c.Print(tweetManager.GetUnreadDirectMessages(username))
+
+			return
+		},
+	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "ReadDirectMessage",
+		Help: "get all messages of user ",
+		Func: func(c *ishell.Context) {
+
+			defer c.ShowPrompt(true)
+
+			c.Print("Write username:")
+			username := c.ReadLine()
+
+			c.Print("Write message id:")
+			messageidstr := c.ReadLine()
+			messageid, _ := strconv.Atoi(messageidstr)
+
+			tweetManager.ReadDirectMessage(tweetManager.GetTweetByID(messageid), username)
+
+			return
+		},
+	})
+
 	shell.Run()
 }
