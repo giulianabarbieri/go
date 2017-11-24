@@ -294,3 +294,85 @@ func TestIsTrendingTopic(t *testing.T) {
 	}
 
 }
+
+func TestCanSendDirectMessagesAndGetAllMessagesFromUser(t *testing.T) {
+
+	//Initialization
+	tweetManager := service.NewTweetManager()
+
+	joaquin := "joaquin"
+	raul := "raul"
+	msg1 := "hola man"
+	msg2 := "hola!"
+	msg3 := "nv"
+
+	tweet1 := domain.NewTweet(joaquin, msg1)
+	tweet2 := domain.NewTweet(raul, msg2)
+	tweet3 := domain.NewTweet(joaquin, msg3)
+
+	id1, _ := tweetManager.PublishTweet(tweet1)
+	id2, _ := tweetManager.PublishTweet(tweet2)
+	id3, _ := tweetManager.PublishTweet(tweet3)
+
+	//Operation
+	tweetManager.SendDirectMessage(tweet1, raul)
+	tweetManager.SendDirectMessage(tweet2, joaquin)
+	tweetManager.SendDirectMessage(tweet3, raul)
+
+	//Validation
+	joaquinsDirectMessages := tweetManager.GetAllDirectMessages(joaquin)
+	raulsDirectMessages := tweetManager.GetAllDirectMessages(raul)
+
+	if len(joaquinsDirectMessages) != 1 {
+		t.Errorf("Joaquin deberia tener 1 solo mensaje directo, tiene %v", len(joaquinsDirectMessages))
+		return
+	}
+
+	if len(raulsDirectMessages) != 2 {
+		t.Errorf("Raul deberia tener 2 mensajes directos, tiene %v", len(raulsDirectMessages))
+	}
+
+	isValidTweet(t, joaquinsDirectMessages[0], id2, raul, msg2)
+	isValidTweet(t, raulsDirectMessages[0], id1, joaquin, msg1)
+	isValidTweet(t, raulsDirectMessages[1], id3, joaquin, msg3)
+}
+
+func TestCanReadADirectMessage(t *testing.T) {
+	//Initialization
+	tweetManager := service.NewTweetManager()
+
+	joaquin := "joaquin"
+	raul := "raul"
+	msg1 := "hola man"
+	msg3 := "alo"
+
+	tweet1 := domain.NewTweet(joaquin, msg1)
+	tweet3 := domain.NewTweet(joaquin, msg3)
+
+	id1, _ := tweetManager.PublishTweet(tweet1)
+	id3, _ := tweetManager.PublishTweet(tweet3)
+
+	tweetManager.SendDirectMessage(tweet1, raul)
+	tweetManager.SendDirectMessage(tweet3, raul)
+
+	//Operation (and validation of getunreadDM)
+	raulsDirectMessages := tweetManager.GetUnreadDirectMessages(raul)
+
+	if len(raulsDirectMessages) != 2 {
+		t.Errorf("Raul deberia tener 2 mensajes directos, tiene %v", len(raulsDirectMessages))
+	}
+
+	isValidTweet(t, raulsDirectMessages[0], id1, joaquin, msg1)
+	isValidTweet(t, raulsDirectMessages[1], id3, joaquin, msg3)
+
+	tweetManager.ReadDirectMessage(tweet3, raul)
+
+	//Validation
+	raulsDirectMessages = tweetManager.GetUnreadDirectMessages(raul)
+
+	if len(raulsDirectMessages) != 1 {
+		t.Errorf("Raul deberia tener 1 mensajes directos, tiene %v", len(raulsDirectMessages))
+	}
+
+	isValidTweet(t, raulsDirectMessages[0], id1, joaquin, msg1)
+}

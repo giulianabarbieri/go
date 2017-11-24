@@ -9,10 +9,24 @@ import (
 
 //TweetManager estruutra del tweetManager
 type TweetManager struct {
-	userFollowing map[string][]string
-	allTweets     map[string][]*domain.Tweet
-	lastTweet     *domain.Tweet
-	wordCounter   map[string]int
+	userFollowing        map[string][]string
+	allTweets            map[string][]*domain.Tweet
+	lastTweet            *domain.Tweet
+	wordCounter          map[string]int
+	allDirectMessages    map[string][]*domain.Tweet
+	unreadDirectMessages map[string][]*domain.Tweet
+}
+
+//NewTweetManager Crea un tweet manager
+func NewTweetManager() TweetManager {
+	return TweetManager{
+		make(map[string][]string), //todo lo que esta luego del primer corchete es el tipo que almacena
+		make(map[string][]*domain.Tweet),
+		nil,
+		make(map[string]int),
+		make(map[string][]*domain.Tweet),
+		make(map[string][]*domain.Tweet),
+	}
 }
 
 //GetTweets obtiene todos los tweets
@@ -139,16 +153,6 @@ func (manager *TweetManager) GetTimeLine(user string) []*domain.Tweet {
 	return sliceOfTweets
 }
 
-//NewTweetManager Crea un tweet manager
-func NewTweetManager() TweetManager {
-	return TweetManager{
-		make(map[string][]string), //todo lo que esta luego del primer corchete es el tipo que almacena
-		make(map[string][]*domain.Tweet),
-		nil,
-		make(map[string]int),
-	}
-}
-
 //GetTrendingTopic obtiene las dos palabras mas usadas en todos los tweets
 func (manager *TweetManager) GetTrendingTopic() []string {
 	firstTopic := ""
@@ -168,4 +172,33 @@ func (manager *TweetManager) GetTrendingTopic() []string {
 		}
 	}
 	return []string{firstTopic, secondTopic}
+}
+
+//SendDirectMessage Envia un mensaje directo al usuario receptor
+func (manager *TweetManager) SendDirectMessage(tweet *domain.Tweet, receiver string) {
+	manager.addTweetToMapStringKey(&manager.allDirectMessages, tweet, receiver)
+	manager.addTweetToMapStringKey(&manager.unreadDirectMessages, tweet, receiver)
+}
+
+func (manager *TweetManager) addTweetToMapStringKey(mapa *map[string][]*domain.Tweet, tweet *domain.Tweet, user string) {
+	tweetList, _ := (*mapa)[user]
+	(*mapa)[user] = append(tweetList, tweet)
+}
+
+//GetAllDirectMessages obtiene todos los mensajes directos de un usuario
+func (manager *TweetManager) GetAllDirectMessages(user string) []*domain.Tweet {
+	return manager.allDirectMessages[user]
+}
+
+func (manager *TweetManager) GetUnreadDirectMessages(user string) []*domain.Tweet {
+	return manager.unreadDirectMessages[user]
+}
+
+func (manager *TweetManager) ReadDirectMessage(tweet *domain.Tweet, user string) {
+	unreadDirectMessages, _ := manager.unreadDirectMessages[user]
+	for index, directMessage := range unreadDirectMessages {
+		if directMessage == tweet {
+			manager.unreadDirectMessages[user] = append(unreadDirectMessages[:index], unreadDirectMessages[index+1:]...)
+		}
+	}
 }
