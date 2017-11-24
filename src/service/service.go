@@ -15,6 +15,7 @@ type TweetManager struct {
 	wordCounter          map[string]int
 	allDirectMessages    map[string][]*domain.Tweet
 	unreadDirectMessages map[string][]*domain.Tweet
+	favTweetsByUser      map[string][]*domain.Tweet
 }
 
 //NewTweetManager Crea un tweet manager
@@ -24,6 +25,7 @@ func NewTweetManager() TweetManager {
 		make(map[string][]*domain.Tweet),
 		nil,
 		make(map[string]int),
+		make(map[string][]*domain.Tweet),
 		make(map[string][]*domain.Tweet),
 		make(map[string][]*domain.Tweet),
 	}
@@ -212,4 +214,12 @@ func (manager *TweetManager) Retweet(tweet *domain.Tweet, user string) {
 
 func (manager *TweetManager) addTweetToUser(tweet *domain.Tweet, user string) {
 	manager.allTweets[user] = append(manager.allTweets[user], tweet)
+}
+
+func (manager *TweetManager) FavTweet(tweet *domain.Tweet, user string) {
+	manager.addTweetToMapStringKey(&manager.favTweetsByUser, tweet, user)
+}
+
+func (manager *TweetManager) GetFavTweets(user string) []*domain.Tweet {
+	return manager.favTweetsByUser[user]
 }

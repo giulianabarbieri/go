@@ -401,3 +401,35 @@ func TestCanRetweetSomeone(t *testing.T) {
 
 	isValidTweet(t, myTweets[0], id, userToRetweet, text)
 }
+
+func TestCanFavATweetAndGetAllFavs(t *testing.T) {
+	// Initialization
+	tweetManager := service.NewTweetManager()
+
+	user1 := "joaquin"
+	user2 := "raul"
+	text1 := "this is my own tweet"
+	text2 := "This is a tweet to fav"
+
+	tweet1 := domain.NewTweet(user1, text1)
+	tweet2 := domain.NewTweet(user2, text2)
+
+	id1, _ := tweetManager.PublishTweet(tweet1)
+	id2, _ := tweetManager.PublishTweet(tweet2)
+
+	// Operation
+	tweetManager.FavTweet(tweet1, user1)
+	tweetManager.FavTweet(tweet2, user1)
+
+	// Validation
+	favTweets := tweetManager.GetFavTweets(user1)
+
+	if len(favTweets) != 2 {
+		t.Errorf("deberia tener 2 tweets, tiene %v", len(favTweets))
+		return
+	}
+
+	isValidTweet(t, favTweets[0], id1, user1, text1)
+	isValidTweet(t, favTweets[1], id2, user2, text2)
+
+}
