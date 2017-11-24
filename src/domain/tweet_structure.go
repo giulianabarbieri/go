@@ -39,3 +39,7 @@ func (tweet *Tweet) PrintableTweet() string {
 	finalText = finalText + tweet.Text
 	return finalText
 }
+
+func (tweet *Tweet) String() string {
+	return tweet.PrintableTweet()
+}
