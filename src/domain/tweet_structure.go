@@ -31,3 +31,11 @@ func NewTweet(user, text string) *Tweet { //pongo *tweet porque estoy en domain,
 func ResetId() {
 	nextId = 0
 }
+
+func (tweet *Tweet) PrintableTweet() string {
+	finalText := "@"
+	finalText = finalText + tweet.User
+	finalText = finalText + ": "
+	finalText = finalText + tweet.Text
+	return finalText
+}
