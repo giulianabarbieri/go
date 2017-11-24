@@ -163,7 +163,7 @@ func TestCanRetrieveTweetById(t *testing.T) {
 	id, _ = tweetManager.PublishTweet(tweet)
 
 	// Validation
-	publishedTweet := tweetManager.GetTweetById(id)
+	publishedTweet := tweetManager.GetTweetByID(id)
 
 	isValidTweet(t, publishedTweet, id, user, text)
 }
@@ -269,7 +269,7 @@ func TestIsTrendingTopic(t *testing.T) {
 	userZorro2 := "Zorro2"
 	textZorro1 := "Me gustan las comadrejas"
 	textZorro2 := "Me encantan las comadrejas"
-	text2Zorro1 := "Me casaria con una comadreja, no mentira, las comadrejas encienden mi estomago"
+	text2Zorro1 := "Me casaria con una comadreja, no mentira. Las comadrejas encienden mi estomago"
 	text2Zorro2 := "Que linda noche para unas comadrejas"
 
 	tweet1 := domain.NewTweet(userZorro1, textZorro1)
@@ -284,12 +284,12 @@ func TestIsTrendingTopic(t *testing.T) {
 
 	theTopic := manager.GetTrendingTopic()
 
-	if len(theThopic) != 2 {
-		t.Errorf("MSJ DE ERROR")
+	if len(theTopic) != 2 {
+		t.Errorf("TT no tiene dos palabras")
 		return
 	}
-	if !(theThopic[0] == "comadrejas" && theTopic[1] == "Me") {
-		t.Errorf("msj de error ")
+	if !(theTopic[0] == "comadrejas" && theTopic[1] == "Me") {
+		t.Errorf("TT inesperado, 1° obtenido: %s, 2° obtenido: %s, cuando deberia ser comadrejas y Me ", theTopic[0], theTopic[1])
 		return
 	}
 
