@@ -277,5 +277,41 @@ func main() {
 		},
 	})
 
+	shell.AddCmd(&ishell.Cmd{
+		Name: "Fav",
+		Help: "make a tweetafav",
+		Func: func(c *ishell.Context) {
+
+			defer c.ShowPrompt(true)
+
+			c.Print("Write username:")
+			username := c.ReadLine()
+
+			c.Print("Write message id:")
+			messageidstr := c.ReadLine()
+			messageid, _ := strconv.Atoi(messageidstr)
+
+			tweetManager.FavTweet(tweetManager.GetTweetByID(messageid), username)
+			c.Print("Tweet Faved")
+			return
+		},
+	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "GetFavs",
+		Help: "get fav tweets of an user",
+		Func: func(c *ishell.Context) {
+
+			defer c.ShowPrompt(true)
+
+			c.Print("Write username:")
+			username := c.ReadLine()
+
+			c.Print(tweetManager.GetFavTweets(username))
+
+			return
+		},
+	})
+
 	shell.Run()
 }
