@@ -16,6 +16,7 @@ type TweeterManager struct {
 	allDirectMessages    map[string][]*domain.Tweeter
 	unreadDirectMessages map[string][]*domain.Tweeter
 	favTweetersByUser    map[string][]*domain.Tweeter
+	pluginList           []*domain.TweetPlugin
 }
 
 //NewTweeterManager Crea un Tweeter manager
@@ -28,6 +29,7 @@ func NewTweeterManager() TweeterManager {
 		make(map[string][]*domain.Tweeter),
 		make(map[string][]*domain.Tweeter),
 		make(map[string][]*domain.Tweeter),
+		make([]*domain.TweetPlugin, 0),
 	}
 }
 
@@ -59,6 +61,31 @@ func (manager *TweeterManager) PublishTweeter(newTweeter *domain.Tweeter) (int, 
 	manager.addTweeterToUser(newTweeter, (*newTweeter).User())
 	manager.lastTweeter = newTweeter
 	return (*newTweeter).Id(), nil
+}
+
+//PublishTweeter publica el Tweeter
+func (manager *TweeterManager) Publish2Tweeter(newTweeter *domain.Tweeter) (int, error, []string) {
+
+	plugResults := make([]string, 0)
+
+	if (*newTweeter).User() == "" {
+		return 0, fmt.Errorf("user is required"), plugResults
+	}
+	if (*newTweeter).Text() == "" {
+		return 0, fmt.Errorf("text is required"), plugResults
+	}
+	if len((*newTweeter).Text()) > 140 {
+		return 0, fmt.Errorf("text exceeds 140 characters"), plugResults
+	}
+
+	manager.addWordsToCounter(*newTweeter)
+	manager.addTweeterToUser(newTweeter, (*newTweeter).User())
+	manager.lastTweeter = newTweeter
+
+	for _, plugin := range manager.pluginList {
+		plugResults = append(plugResults, (*plugin).RunPlugin())
+	}
+	return (*newTweeter).Id(), nil, plugResults
 }
 
 func (manager *TweeterManager) addWordsToCounter(tweet domain.Tweeter) {
@@ -222,4 +249,12 @@ func (manager *TweeterManager) FavTweeter(tweeter *domain.Tweeter, user string) 
 
 func (manager *TweeterManager) GetFavTweeters(user string) []*domain.Tweeter {
 	return manager.favTweetersByUser[user]
+}
+
+func (manager *TweeterManager) AddPlugin(plugin *domain.TweetPlugin) {
+	manager.pluginList = append(manager.pluginList, plugin)
+}
+
+func (manager *TweeterManager) GetPlugins() []*domain.TweetPlugin {
+	return manager.pluginList
 }
