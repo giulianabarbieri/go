@@ -35,8 +35,8 @@ func NewTweeterManager() TweeterManager {
 func (manager *TweeterManager) GetTweeters() []*domain.Tweeter {
 	allTweetersInSlice := make([]*domain.Tweeter, 0)
 	for _, TweeterList := range manager.allTweeters {
-		for _, Tweeter := range TweeterList {
-			allTweetersInSlice = append(allTweetersInSlice, Tweeter)
+		for _, tweeter := range TweeterList {
+			allTweetersInSlice = append(allTweetersInSlice, tweeter)
 		}
 	}
 	return allTweetersInSlice
@@ -55,14 +55,14 @@ func (manager *TweeterManager) PublishTweeter(newTweeter *domain.Tweeter) (int, 
 		return 0, fmt.Errorf("text exceeds 140 characters")
 	}
 
-	manager.addWordsToCounter(newTweeter)
+	manager.addWordsToCounter(*newTweeter)
 	manager.addTweeterToUser(newTweeter, (*newTweeter).User())
 	manager.lastTweeter = newTweeter
 	return (*newTweeter).Id(), nil
 }
 
-func (manager *TweeterManager) addWordsToCounter(tweet *domain.Tweeter) {
-	text := (*tweet).Text()
+func (manager *TweeterManager) addWordsToCounter(tweet domain.Tweeter) {
+	text := (tweet).Text()
 	wordsList := strings.Fields(text)
 
 	for _, word := range wordsList {
@@ -177,9 +177,9 @@ func (manager *TweeterManager) GetTrendingTopic() []string {
 }
 
 //SendDirectMessage Envia un mensaje directo al usuario receptor
-func (manager *TweeterManager) SendDirectMessage(Tweeter *domain.Tweeter, receiver string) {
-	manager.addTweeterToMapStringKey(&manager.allDirectMessages, Tweeter, receiver)
-	manager.addTweeterToMapStringKey(&manager.unreadDirectMessages, Tweeter, receiver)
+func (manager *TweeterManager) SendDirectMessage(tweeter *domain.Tweeter, receiver string) {
+	manager.addTweeterToMapStringKey(&manager.allDirectMessages, tweeter, receiver)
+	manager.addTweeterToMapStringKey(&manager.unreadDirectMessages, tweeter, receiver)
 }
 
 func (manager *TweeterManager) addTweeterToMapStringKey(mapa *map[string][]*domain.Tweeter, Tweeter *domain.Tweeter, user string) {
@@ -198,26 +198,26 @@ func (manager *TweeterManager) GetUnreadDirectMessages(user string) []*domain.Tw
 }
 
 //ReadDirectMessage marca un mensaje como leido
-func (manager *TweeterManager) ReadDirectMessage(Tweeter *domain.Tweeter, user string) {
+func (manager *TweeterManager) ReadDirectMessage(tweeter *domain.Tweeter, user string) {
 	unreadDirectMessages, _ := manager.unreadDirectMessages[user]
 	for index, directMessage := range unreadDirectMessages {
-		if directMessage == Tweeter {
+		if directMessage == tweeter {
 			manager.unreadDirectMessages[user] = append(unreadDirectMessages[:index], unreadDirectMessages[index+1:]...)
 		}
 	}
 }
 
 //ReTweeter hace que el Tweeter aparezca dentro de mis Tweeters
-func (manager *TweeterManager) ReTweeter(Tweeter *domain.Tweeter, user string) {
-	manager.addTweeterToUser(Tweeter, user)
+func (manager *TweeterManager) ReTweeter(tweeter *domain.Tweeter, user string) {
+	manager.addTweeterToUser(tweeter, user)
 }
 
-func (manager *TweeterManager) addTweeterToUser(Tweeter *domain.Tweeter, user string) {
-	manager.allTweeters[user] = append(manager.allTweeters[user], Tweeter)
+func (manager *TweeterManager) addTweeterToUser(tweeter *domain.Tweeter, user string) {
+	manager.allTweeters[user] = append(manager.allTweeters[user], tweeter)
 }
 
-func (manager *TweeterManager) FavTweeter(Tweeter *domain.Tweeter, user string) {
-	manager.addTweeterToMapStringKey(&manager.favTweetersByUser, Tweeter, user)
+func (manager *TweeterManager) FavTweeter(tweeter *domain.Tweeter, user string) {
+	manager.addTweeterToMapStringKey(&manager.favTweetersByUser, tweeter, user)
 }
 
 func (manager *TweeterManager) GetFavTweeters(user string) []*domain.Tweeter {

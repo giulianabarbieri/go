@@ -13,11 +13,11 @@ func main() {
 	shell.SetPrompt("Tweeter >>")
 	shell.Print("Type 'help' to know commands \n")
 
-	tweetManager := service.NewTweetManager() //Creo el manager
+	tweetManager := service.NewTweeterManager() //Creo el manager
 
-	//a la consola interactiva le agrega un comando
+	//PublishTextTweet
 	shell.AddCmd(&ishell.Cmd{
-		Name: "publishTweet",
+		Name: "PublishTextTweet",
 		Help: "publishes  a tweet",
 		Func: func(c *ishell.Context) { //que queremos ejecutar cuando alquien escriba el comando
 
@@ -29,8 +29,9 @@ func main() {
 			c.Print("Write your tweet:")
 			message := c.ReadLine()
 
-			tweet := domain.NewTweet(username, message)
-			_, err := tweetManager.PublishTweet(tweet)
+			var tweet1 domain.Tweeter = domain.NewTextTweet(username, message)
+			tweet := &tweet1
+			_, err := tweetManager.PublishTweeter(tweet)
 			if err != nil {
 				c.Print("An error has ocurred, tweet not published")
 				return
@@ -41,6 +42,7 @@ func main() {
 			return
 		}, //publicar tweet
 	})
+
 	//muestra el ultimo tweet que se guardo
 	shell.AddCmd(&ishell.Cmd{
 		Name: "ShowTweet",
@@ -49,7 +51,7 @@ func main() {
 
 			defer c.ShowPrompt(true)
 
-			tweet := tweetManager.GetTweet()
+			tweet := tweetManager.GetTweeter()
 
 			c.Print(tweet)
 
@@ -57,6 +59,7 @@ func main() {
 		},
 	})
 
+	//Borra el ultimo tweet que se mando
 	shell.AddCmd(&ishell.Cmd{
 		Name: "CleanTweet",
 		Help: "Clean a atweet",
@@ -64,12 +67,13 @@ func main() {
 
 			defer c.ShowPrompt(true)
 
-			tweetManager.CleanTweet()
+			tweetManager.CleanTweeter()
 
 			return
 		},
 	})
 
+	//Muestra todos los tweets
 	shell.AddCmd(&ishell.Cmd{
 		Name: "ShowAllTweets",
 		Help: "te muestra TODO ",
@@ -77,12 +81,13 @@ func main() {
 
 			defer c.ShowPrompt(true)
 
-			c.Print(tweetManager.GetTweets())
+			c.Print(tweetManager.GetTweeters())
 
 			return
 		}, //publicar tweet
 	})
 
+	//Contar tweets de un usuario
 	shell.AddCmd(&ishell.Cmd{
 		Name: "CountUserTweets",
 		Help: "Cuenta los tweets de un usuario ",
@@ -93,12 +98,13 @@ func main() {
 			c.Print("Write your username: ")
 			username := c.ReadLine()
 
-			c.Print(tweetManager.CountTweetsByUser(username))
+			c.Print(tweetManager.CountTweetersByUser(username))
 
 			return
 		}, //publicar tweet
 	})
 
+	//Obtener tweet por id
 	shell.AddCmd(&ishell.Cmd{
 		Name: "GetTweetById",
 		Help: "Obtiene tweeter con su identificacion unica ",
@@ -110,12 +116,13 @@ func main() {
 			idstr := c.ReadLine()
 			id, _ := strconv.Atoi(idstr)
 
-			c.Print(tweetManager.GetTweetByID(id))
+			c.Print(tweetManager.GetTweeterByID(id))
 
 			return
 		}, //publicar tweet
 	})
 
+	//Obtener tweets por usuario
 	shell.AddCmd(&ishell.Cmd{
 		Name: "GetTweetsByUser",
 		Help: "Obtiene los tweets por usuario ",
@@ -126,12 +133,13 @@ func main() {
 			c.Print("Write username: ")
 			username := c.ReadLine()
 
-			c.Print(tweetManager.GetTweetsByUser(username))
+			c.Print(tweetManager.GetTweetersByUser(username))
 
 			return
 		},
 	})
 
+	//Seguir a alguien
 	shell.AddCmd(&ishell.Cmd{
 		Name: "Follow",
 		Help: "sigue a un usuario ",
@@ -151,6 +159,7 @@ func main() {
 		},
 	})
 
+	//Obtener timeline
 	shell.AddCmd(&ishell.Cmd{
 		Name: "GetTimeLine",
 		Help: "obtiene el timeline de un usario ",
@@ -167,6 +176,7 @@ func main() {
 		},
 	})
 
+	//Obtener trending topics
 	shell.AddCmd(&ishell.Cmd{
 		Name: "GetTrendingTopics",
 		Help: "obtiene el trending topic ",
@@ -180,6 +190,7 @@ func main() {
 		},
 	})
 
+	//Enviar mensaje directo
 	shell.AddCmd(&ishell.Cmd{
 		Name: "SendDirectMessage",
 		Help: "envia un tweet como mensaje directo",
@@ -193,7 +204,8 @@ func main() {
 			c.Print("Write your message:")
 			message := c.ReadLine()
 
-			tweet := domain.NewTweet(username, message)
+			var tweet1 domain.Tweeter = domain.NewTextTweet(username, message)
+			tweet := &tweet1
 			c.Print("Write receiver of the message:")
 			receiver := c.ReadLine()
 
@@ -205,6 +217,7 @@ func main() {
 		},
 	})
 
+	//Obtener mensajes directos
 	shell.AddCmd(&ishell.Cmd{
 		Name: "GetAllDirectMEssages",
 		Help: "get all messages of user ",
@@ -221,6 +234,7 @@ func main() {
 		},
 	})
 
+	//Obtener mensajes directos sin leer
 	shell.AddCmd(&ishell.Cmd{
 		Name: "GetUnreadDirectMessages",
 		Help: "get all unread messages of user ",
@@ -237,6 +251,7 @@ func main() {
 		},
 	})
 
+	//Marcar un mensaje como leido
 	shell.AddCmd(&ishell.Cmd{
 		Name: "ReadDirectMessage",
 		Help: "get all messages of user ",
@@ -251,12 +266,13 @@ func main() {
 			messageidstr := c.ReadLine()
 			messageid, _ := strconv.Atoi(messageidstr)
 
-			tweetManager.ReadDirectMessage(tweetManager.GetTweetByID(messageid), username)
+			tweetManager.ReadDirectMessage(tweetManager.GetTweeterByID(messageid), username)
 
 			return
 		},
 	})
 
+	//Retweetear
 	shell.AddCmd(&ishell.Cmd{
 		Name: "Retweet",
 		Help: "can retweet a tweetby id",
@@ -271,12 +287,13 @@ func main() {
 			messageidstr := c.ReadLine()
 			messageid, _ := strconv.Atoi(messageidstr)
 
-			tweetManager.Retweet(tweetManager.GetTweetByID(messageid), username)
+			tweetManager.ReTweeter(tweetManager.GetTweeterByID(messageid), username)
 
 			return
 		},
 	})
 
+	//Marcar un tweet como favorito
 	shell.AddCmd(&ishell.Cmd{
 		Name: "Fav",
 		Help: "make a tweetafav",
@@ -291,12 +308,13 @@ func main() {
 			messageidstr := c.ReadLine()
 			messageid, _ := strconv.Atoi(messageidstr)
 
-			tweetManager.FavTweet(tweetManager.GetTweetByID(messageid), username)
+			tweetManager.FavTweeter(tweetManager.GetTweeterByID(messageid), username)
 			c.Print("Tweet Faved")
 			return
 		},
 	})
 
+	//Obtener favoritos
 	shell.AddCmd(&ishell.Cmd{
 		Name: "GetFavs",
 		Help: "get fav tweets of an user",
@@ -307,7 +325,7 @@ func main() {
 			c.Print("Write username:")
 			username := c.ReadLine()
 
-			c.Print(tweetManager.GetFavTweets(username))
+			c.Print(tweetManager.GetFavTweeters(username))
 
 			return
 		},

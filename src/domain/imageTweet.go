@@ -6,7 +6,7 @@ import "time"
 type ImageTweet struct {
 	UserAtr  string
 	TextAtr  string
-	Date     *time.Time
+	DateAtr  *time.Time
 	IDAtr    int
 	ImageURL string
 }
@@ -48,4 +48,8 @@ func (tweet *ImageTweet) Text() string {
 }
 func (tweet *ImageTweet) Id() int {
 	return tweet.IDAtr
+}
+
+func (tweet *ImageTweet) Date() *time.Time {
+	return tweet.DateAtr
 }

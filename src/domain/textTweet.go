@@ -6,7 +6,7 @@ import "time"
 type TextTweet struct {
 	UserATR string
 	TextATR string
-	Date    *time.Time
+	DateAtr *time.Time
 	IDATR   int
 }
 
@@ -45,4 +45,8 @@ func (tweet *TextTweet) Text() string {
 }
 func (tweet *TextTweet) Id() int {
 	return tweet.IDATR
+}
+
+func (tweet *TextTweet) Date() *time.Time {
+	return tweet.DateAtr
 }

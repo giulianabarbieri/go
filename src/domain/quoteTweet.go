@@ -6,7 +6,7 @@ import "time"
 type QuoteTweet struct {
 	UserATR     string
 	TextATR     string
-	Date        *time.Time
+	DateAtr     *time.Time
 	IDATR       int
 	TweetQuoted Tweeter
 }
@@ -51,4 +51,8 @@ func (tweet *QuoteTweet) Text() string {
 }
 func (tweet *QuoteTweet) Id() int {
 	return tweet.IDATR
+}
+
+func (tweet *QuoteTweet) Date() *time.Time {
+	return tweet.DateAtr
 }
