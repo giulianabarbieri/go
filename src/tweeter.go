@@ -12,8 +12,9 @@ func main() {
 	shell := ishell.New() //new de la libreria
 	shell.SetPrompt("Tweeter >>")
 	shell.Print("Type 'help' to know commands \n")
-
-	tweetManager := service.NewTweeterManager() //Creo el manager
+	memoryTweetWriter := service.NewMemoryTweetWriter()
+	tweetWriter := service.NewChannelTweetWriter(memoryTweetWriter)
+	tweetManager := service.NewTweetManager(tweetWriter)
 
 	//PublishTextTweet
 	shell.AddCmd(&ishell.Cmd{
@@ -29,9 +30,10 @@ func main() {
 			c.Print("Write your tweet:")
 			message := c.ReadLine()
 
-			var tweet1 domain.Tweeter = domain.NewTextTweet(username, message)
-			tweet := &tweet1
-			_, err := tweetManager.PublishTweeter(tweet)
+			var tweet domain.Tweet = domain.NewTextTweet(username, message)
+			quit := make(chan bool)
+			_, err := tweetManager.PublishTweet(tweet, quit)
+
 			if err != nil {
 				c.Print("An error has ocurred, tweet not published")
 				return
@@ -51,7 +53,7 @@ func main() {
 
 			defer c.ShowPrompt(true)
 
-			tweet := tweetManager.GetTweeter()
+			tweet := tweetManager.GetTweet()
 
 			c.Print(tweet)
 
@@ -67,7 +69,7 @@ func main() {
 
 			defer c.ShowPrompt(true)
 
-			tweetManager.CleanTweeter()
+			tweetManager.CleanTweet()
 
 			return
 		},
@@ -81,7 +83,7 @@ func main() {
 
 			defer c.ShowPrompt(true)
 
-			c.Print(tweetManager.GetTweeters())
+			c.Print(tweetManager.GetTweet())
 
 			return
 		}, //publicar tweet
@@ -98,7 +100,7 @@ func main() {
 			c.Print("Write your username: ")
 			username := c.ReadLine()
 
-			c.Print(tweetManager.CountTweetersByUser(username))
+			c.Print(tweetManager.CountTweetsByUser(username))
 
 			return
 		}, //publicar tweet
@@ -116,7 +118,7 @@ func main() {
 			idstr := c.ReadLine()
 			id, _ := strconv.Atoi(idstr)
 
-			c.Print(tweetManager.GetTweeterByID(id))
+			c.Print(tweetManager.GetTweetById(id))
 
 			return
 		}, //publicar tweet
@@ -133,7 +135,7 @@ func main() {
 			c.Print("Write username: ")
 			username := c.ReadLine()
 
-			c.Print(tweetManager.GetTweetersByUser(username))
+			c.Print(tweetManager.GetTweetsByUser(username))
 
 			return
 		},
@@ -204,8 +206,8 @@ func main() {
 			c.Print("Write your message:")
 			message := c.ReadLine()
 
-			var tweet1 domain.Tweeter = domain.NewTextTweet(username, message)
-			tweet := &tweet1
+			var tweet domain.Tweet = domain.NewTextTweet(username, message)
+
 			c.Print("Write receiver of the message:")
 			receiver := c.ReadLine()
 
@@ -266,7 +268,7 @@ func main() {
 			messageidstr := c.ReadLine()
 			messageid, _ := strconv.Atoi(messageidstr)
 
-			tweetManager.ReadDirectMessage(tweetManager.GetTweeterByID(messageid), username)
+			tweetManager.ReadDirectMessage(tweetManager.GetTweetById(messageid), username)
 
 			return
 		},
@@ -287,7 +289,7 @@ func main() {
 			messageidstr := c.ReadLine()
 			messageid, _ := strconv.Atoi(messageidstr)
 
-			tweetManager.ReTweeter(tweetManager.GetTweeterByID(messageid), username)
+			tweetManager.ReTweet(tweetManager.GetTweetById(messageid), username)
 
 			return
 		},
@@ -308,7 +310,7 @@ func main() {
 			messageidstr := c.ReadLine()
 			messageid, _ := strconv.Atoi(messageidstr)
 
-			tweetManager.FavTweeter(tweetManager.GetTweeterByID(messageid), username)
+			tweetManager.FavTweet(tweetManager.GetTweetById(messageid), username)
 			c.Print("Tweet Faved")
 			return
 		},
@@ -325,7 +327,7 @@ func main() {
 			c.Print("Write username:")
 			username := c.ReadLine()
 
-			c.Print(tweetManager.GetFavTweeters(username))
+			c.Print(tweetManager.GetFavTweets(username))
 
 			return
 		},
