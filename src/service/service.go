@@ -18,6 +18,7 @@ type TweetManager struct {
 	favTweetsByUser      map[string][]domain.Tweet
 	pluginList           []domain.TweetPlugin
 	ChannelWrite         *ChannelTweetWriter
+	lastPluginMessages   []string
 }
 
 //NewTweetManager Crea un Tweet manager
@@ -32,6 +33,7 @@ func NewTweetManager(channelWrite *ChannelTweetWriter) TweetManager {
 		make(map[string][]domain.Tweet),
 		make([]domain.TweetPlugin, 0),
 		channelWrite,
+		make([]string, 0),
 	}
 }
 
@@ -66,9 +68,19 @@ func (manager *TweetManager) PublishTweet(newTweet domain.Tweet, quit chan bool)
 	tweetChannel := make(chan domain.Tweet)
 	go manager.ChannelWrite.WriteTweet(tweetChannel, quit)
 	tweetChannel <- newTweet
+	manager.runPlugins()
 	close(tweetChannel)
 
 	return (newTweet).Id(), nil
+}
+
+func (manager *TweetManager) runPlugins() {
+	manager.lastPluginMessages = make([]string, 0)
+
+	for _, plugin := range manager.pluginList {
+		manager.lastPluginMessages = append(manager.lastPluginMessages, plugin.RunPlugin())
+	}
+
 }
 
 func (manager *TweetManager) addWordsToCounter(tweet domain.Tweet) {
@@ -240,4 +252,8 @@ func (manager *TweetManager) AddPlugin(plugin domain.TweetPlugin) {
 
 func (manager *TweetManager) GetPlugins() []domain.TweetPlugin {
 	return manager.pluginList
+}
+
+func (manager *TweetManager) PluginMessages() []string {
+	return manager.lastPluginMessages
 }

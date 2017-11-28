@@ -9,9 +9,11 @@ import (
 
 func TestAddPlugin(t *testing.T) {
 	//Initialization
-	tweetManager := service.NewTweeterManager()
-	var myplugin1 domain.TweetPlugin = domain.NewFacebookPlugin()
-	myplugin := &myplugin1
+	memoryTweetWriter := service.NewMemoryTweetWriter()
+	tweetWriter := service.NewChannelTweetWriter(memoryTweetWriter)
+	tweetManager := service.NewTweetManager(tweetWriter)
+	var myplugin domain.TweetPlugin = domain.NewFacebookPlugin()
+
 	//Operation
 	tweetManager.AddPlugin(myplugin)
 
@@ -29,11 +31,12 @@ func TestAddPlugin(t *testing.T) {
 
 func TestCanAddMoreThan1Plugin(t *testing.T) {
 	//Initialization
-	tweetManager := service.NewTweeterManager()
-	var myplugin1 domain.TweetPlugin = domain.NewFacebookPlugin()
-	myplugin := &myplugin1
-	var anotherplugin1 domain.TweetPlugin = domain.NewGooglePlusPlugin()
-	anotherplugin := &anotherplugin1
+	memoryTweetWriter := service.NewMemoryTweetWriter()
+	tweetWriter := service.NewChannelTweetWriter(memoryTweetWriter)
+	tweetManager := service.NewTweetManager(tweetWriter)
+
+	var myplugin domain.TweetPlugin = domain.NewFacebookPlugin()
+	var anotherplugin domain.TweetPlugin = domain.NewGooglePlusPlugin()
 
 	//Operation
 	tweetManager.AddPlugin(myplugin)
@@ -53,21 +56,25 @@ func TestCanAddMoreThan1Plugin(t *testing.T) {
 
 func TestPluginWorks(t *testing.T) {
 	//Initialization
-	tweetManager := service.NewTweeterManager()
-	var myplugin1 domain.TweetPlugin = domain.NewFacebookPlugin()
-	myplugin := &myplugin1
-	var anotherplugin1 domain.TweetPlugin = domain.NewGooglePlusPlugin()
-	anotherplugin := &anotherplugin1
+	memoryTweetWriter := service.NewMemoryTweetWriter()
+	tweetWriter := service.NewChannelTweetWriter(memoryTweetWriter)
+	tweetManager := service.NewTweetManager(tweetWriter)
+
+	var myplugin domain.TweetPlugin = domain.NewFacebookPlugin()
+	var anotherplugin domain.TweetPlugin = domain.NewGooglePlusPlugin()
+
 	tweetManager.AddPlugin(myplugin)
 	tweetManager.AddPlugin(anotherplugin)
-	var tweet domain.Tweeter = domain.NewTextTweet("bs", "asd")
+	var tweet domain.Tweet = domain.NewTextTweet("bs", "asd")
 
 	//Operation
-	_, _, pluginMessages := tweetManager.Publish2Tweeter(&tweet)
+	quit := make(chan bool)
+	tweetManager.PublishTweet(tweet, quit)
+	<-quit
 
 	//Validation
 
-	if len(pluginMessages) != 2 {
+	if len(tweetManager.PluginMessages()) != 2 {
 		t.Errorf("No se corrieron los plugins")
 		return
 	}

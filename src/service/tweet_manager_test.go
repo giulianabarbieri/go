@@ -1,7 +1,6 @@
 package service_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/go/src/domain"
@@ -25,17 +24,16 @@ func TestPublishedTweetIsSaved(t *testing.T) {
 	tweet = domain.NewTextTweet(user, text)
 
 	quit := make(chan bool)
-	fmt.Println("0")
+
 	// Operation
 	id, _ := tweetManager.PublishTweet(tweet, quit)
-	fmt.Println("0.1")
+
 	// Validation
 	publishedTweet := tweetManager.GetTweet()
-	fmt.Println("0.2")
+
 	isValidTweet(t, publishedTweet, id, user, text)
-	fmt.Println("1")
+
 	<-quit
-	fmt.Println("2")
 	if memoryTweetWriter.Tweets[0] != tweet {
 		t.Errorf("A tweet in the writer was expected")
 	}
