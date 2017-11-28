@@ -8,11 +8,11 @@ type QuoteTweet struct {
 	TextATR     string
 	DateAtr     *time.Time
 	IDATR       int
-	TweetQuoted Tweeter
+	TweetQuoted Tweet
 }
 
 //NewQuoteTweet crea un tweet de texto
-func NewQuoteTweet(user, text string, tweetToQuote Tweeter) *QuoteTweet {
+func NewQuoteTweet(user, text string, tweetToQuote Tweet) *QuoteTweet {
 	date := time.Now()
 
 	tweet := QuoteTweet{
@@ -55,4 +55,20 @@ func (tweet *QuoteTweet) Id() int {
 
 func (tweet *QuoteTweet) Date() *time.Time {
 	return tweet.DateAtr
+}
+
+func (tweet *QuoteTweet) GetId() int {
+	return tweet.Id()
+}
+
+func (tweet *QuoteTweet) GetUser() string {
+	return tweet.User()
+}
+
+func (tweet *QuoteTweet) GetDate() *time.Time {
+	return tweet.Date()
+}
+
+func (tweet *QuoteTweet) GetText() string {
+	return tweet.Text()
 }

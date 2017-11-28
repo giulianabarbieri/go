@@ -53,3 +53,19 @@ func (tweet *ImageTweet) Id() int {
 func (tweet *ImageTweet) Date() *time.Time {
 	return tweet.DateAtr
 }
+
+func (tweet *ImageTweet) GetId() int {
+	return tweet.Id()
+}
+
+func (tweet *ImageTweet) GetUser() string {
+	return tweet.User()
+}
+
+func (tweet *ImageTweet) GetDate() *time.Time {
+	return tweet.Date()
+}
+
+func (tweet *ImageTweet) GetText() string {
+	return tweet.Text()
+}

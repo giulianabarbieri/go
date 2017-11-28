@@ -7,88 +7,71 @@ import (
 	"github.com/go/src/domain"
 )
 
-//TweeterManager estruutra del TweeterManager
-type TweeterManager struct {
+//TweetManager estruutra del TweetManager
+type TweetManager struct {
 	userFollowing        map[string][]string
-	allTweeters          map[string][]*domain.Tweeter
-	lastTweeter          *domain.Tweeter
+	allTweets            map[string][]domain.Tweet
+	lastTweet            domain.Tweet
 	wordCounter          map[string]int
-	allDirectMessages    map[string][]*domain.Tweeter
-	unreadDirectMessages map[string][]*domain.Tweeter
-	favTweetersByUser    map[string][]*domain.Tweeter
-	pluginList           []*domain.TweetPlugin
+	allDirectMessages    map[string][]domain.Tweet
+	unreadDirectMessages map[string][]domain.Tweet
+	favTweetsByUser      map[string][]domain.Tweet
+	pluginList           []domain.TweetPlugin
+	ChannelWrite         *ChannelTweetWriter
 }
 
-//NewTweeterManager Crea un Tweeter manager
-func NewTweeterManager() TweeterManager {
-	return TweeterManager{
+//NewTweetManager Crea un Tweet manager
+func NewTweetManager(channelWrite *ChannelTweetWriter) TweetManager {
+	return TweetManager{
 		make(map[string][]string), //todo lo que esta luego del primer corchete es el tipo que almacena
-		make(map[string][]*domain.Tweeter),
+		make(map[string][]domain.Tweet),
 		nil,
 		make(map[string]int),
-		make(map[string][]*domain.Tweeter),
-		make(map[string][]*domain.Tweeter),
-		make(map[string][]*domain.Tweeter),
-		make([]*domain.TweetPlugin, 0),
+		make(map[string][]domain.Tweet),
+		make(map[string][]domain.Tweet),
+		make(map[string][]domain.Tweet),
+		make([]domain.TweetPlugin, 0),
+		channelWrite,
 	}
 }
 
-//GetTweeters obtiene todos los Tweeters
-func (manager *TweeterManager) GetTweeters() []*domain.Tweeter {
-	allTweetersInSlice := make([]*domain.Tweeter, 0)
-	for _, TweeterList := range manager.allTweeters {
-		for _, tweeter := range TweeterList {
-			allTweetersInSlice = append(allTweetersInSlice, tweeter)
+//GetTweets obtiene todos los Tweets
+func (manager *TweetManager) GetTweets() []domain.Tweet {
+	allTweetsInSlice := make([]domain.Tweet, 0)
+	for _, TweetList := range manager.allTweets {
+		for _, Tweet := range TweetList {
+			allTweetsInSlice = append(allTweetsInSlice, Tweet)
 		}
 	}
-	return allTweetersInSlice
+	return allTweetsInSlice
 }
 
-//PublishTweeter publica el Tweeter
-func (manager *TweeterManager) PublishTweeter(newTweeter *domain.Tweeter) (int, error) {
+//PublishTweet publica el Tweet
+func (manager *TweetManager) PublishTweet(newTweet domain.Tweet, quit chan bool) (int, error) {
 
-	if (*newTweeter).User() == "" {
+	if (newTweet).User() == "" {
 		return 0, fmt.Errorf("user is required")
 	}
-	if (*newTweeter).Text() == "" {
+	if (newTweet).Text() == "" {
 		return 0, fmt.Errorf("text is required")
 	}
-	if len((*newTweeter).Text()) > 140 {
+	if len((newTweet).Text()) > 140 {
 		return 0, fmt.Errorf("text exceeds 140 characters")
 	}
 
-	manager.addWordsToCounter(*newTweeter)
-	manager.addTweeterToUser(newTweeter, (*newTweeter).User())
-	manager.lastTweeter = newTweeter
-	return (*newTweeter).Id(), nil
+	manager.addWordsToCounter(newTweet)
+	manager.addTweetToUser(newTweet, (newTweet).User())
+	manager.lastTweet = newTweet
+
+	tweetChannel := make(chan domain.Tweet)
+	go manager.ChannelWrite.WriteTweet(tweetChannel, quit)
+	tweetChannel <- newTweet
+	close(tweetChannel)
+
+	return (newTweet).Id(), nil
 }
 
-//PublishTweeter publica el Tweeter
-func (manager *TweeterManager) Publish2Tweeter(newTweeter *domain.Tweeter) (int, error, []string) {
-
-	plugResults := make([]string, 0)
-
-	if (*newTweeter).User() == "" {
-		return 0, fmt.Errorf("user is required"), plugResults
-	}
-	if (*newTweeter).Text() == "" {
-		return 0, fmt.Errorf("text is required"), plugResults
-	}
-	if len((*newTweeter).Text()) > 140 {
-		return 0, fmt.Errorf("text exceeds 140 characters"), plugResults
-	}
-
-	manager.addWordsToCounter(*newTweeter)
-	manager.addTweeterToUser(newTweeter, (*newTweeter).User())
-	manager.lastTweeter = newTweeter
-
-	for _, plugin := range manager.pluginList {
-		plugResults = append(plugResults, (*plugin).RunPlugin())
-	}
-	return (*newTweeter).Id(), nil, plugResults
-}
-
-func (manager *TweeterManager) addWordsToCounter(tweet domain.Tweeter) {
+func (manager *TweetManager) addWordsToCounter(tweet domain.Tweet) {
 	text := (tweet).Text()
 	wordsList := strings.Fields(text)
 
@@ -98,42 +81,42 @@ func (manager *TweeterManager) addWordsToCounter(tweet domain.Tweeter) {
 	}
 }
 
-//GetTweeter obtiene el ultimo Tweeter enviado. Nil si el ultimo se boroo o no hay Tweeters
-func (manager *TweeterManager) GetTweeter() *domain.Tweeter {
-	return manager.lastTweeter
+//GetTweet obtiene el ultimo Tweet enviado. Nil si el ultimo se boroo o no hay Tweets
+func (manager *TweetManager) GetTweet() domain.Tweet {
+	return manager.lastTweet
 }
 
 //Hacer que se reduzcan las  palabras del contador para el TT
-//CleanTweeter borra el ultimo Tweeter enviado
-func (manager *TweeterManager) CleanTweeter() {
-	//Testear bien que ser borre el Tweeter del map
-	if manager.lastTweeter != nil {
-		Tweeters := manager.GetTweetersByUser((*manager.lastTweeter).User())
+//CleanTweet borra el ultimo Tweet enviado
+func (manager *TweetManager) CleanTweet() {
+	//Testear bien que ser borre el Tweet del map
+	if manager.lastTweet != nil {
+		Tweets := manager.GetTweetsByUser((manager.lastTweet).User())
 
-		for idx, Tweeter := range Tweeters {
-			if Tweeter == manager.lastTweeter {
-				manager.allTweeters[(*manager.lastTweeter).User()] = append(manager.allTweeters[(*manager.lastTweeter).User()][:idx], manager.allTweeters[(*manager.lastTweeter).User()][idx+1:]...)
+		for idx, Tweet := range Tweets {
+			if Tweet == manager.lastTweet {
+				manager.allTweets[(manager.lastTweet).User()] = append(manager.allTweets[(manager.lastTweet).User()][:idx], manager.allTweets[(manager.lastTweet).User()][idx+1:]...)
 			}
 		}
 	}
-	manager.lastTweeter = nil
+	manager.lastTweet = nil
 }
 
 //Hacer test de este metodo
-//CleanTweeters borra todos los Tweeters
-func (manager *TweeterManager) CleanTweeters() {
-	manager.allTweeters = make(map[string][]*domain.Tweeter)
-	manager.lastTweeter = nil
+//CleanTweets borra todos los Tweets
+func (manager *TweetManager) CleanTweets() {
+	manager.allTweets = make(map[string][]domain.Tweet)
+	manager.lastTweet = nil
 	manager.wordCounter = make(map[string]int)
 	manager.userFollowing = make(map[string][]string)
 }
 
-//GetTweeterByID obtiene el Tweeter con el id. Nil si no existe
-func (manager *TweeterManager) GetTweeterByID(id int) *domain.Tweeter {
-	//Obtengo todos los Tweeters
-	for _, userTweeterList := range manager.allTweeters {
-		for _, tweet := range userTweeterList {
-			if (*tweet).Id() == id {
+//GetTweetByID obtiene el Tweet con el id. Nil si no existe
+func (manager *TweetManager) GetTweetById(id int) domain.Tweet {
+	//Obtengo todos los Tweets
+	for _, userTweetList := range manager.allTweets {
+		for _, tweet := range userTweetList {
+			if (tweet).Id() == id {
 				return tweet
 			}
 		}
@@ -142,22 +125,22 @@ func (manager *TweeterManager) GetTweeterByID(id int) *domain.Tweeter {
 	return nil
 }
 
-//CountTweetersByUser cuenta los Tweeters del usario
-func (manager *TweeterManager) CountTweetersByUser(user string) int {
-	userTweeters, usuarioExiste := manager.allTweeters[user]
+//CountTweetsByUser cuenta los Tweets del usario
+func (manager *TweetManager) CountTweetsByUser(user string) int {
+	userTweets, usuarioExiste := manager.allTweets[user]
 	if usuarioExiste {
-		return len(userTweeters)
+		return len(userTweets)
 	}
 	return 0
 }
 
-//GetTweetersByUser obtiene los Tweeters del usuario
-func (manager *TweeterManager) GetTweetersByUser(user string) []*domain.Tweeter {
-	return manager.allTweeters[user]
+//GetTweetsByUser obtiene los Tweets del usuario
+func (manager *TweetManager) GetTweetsByUser(user string) []domain.Tweet {
+	return manager.allTweets[user]
 }
 
 //Follow hace que un usuario siga a otro
-func (manager *TweeterManager) Follow(user1, user2 string) {
+func (manager *TweetManager) Follow(user1, user2 string) {
 	usersFollowed, esSeguidorDeUser2 := manager.userFollowing[user1]
 	if !esSeguidorDeUser2 {
 		usersFollowed = make([]string, 0)
@@ -167,23 +150,23 @@ func (manager *TweeterManager) Follow(user1, user2 string) {
 
 //Rehacer el tests de este metodo
 //GetTimeLine obtiene la timeline del user
-func (manager *TweeterManager) GetTimeLine(user string) []*domain.Tweeter {
+func (manager *TweetManager) GetTimeLine(user string) []domain.Tweet {
 	followed := manager.userFollowing[user]
-	sliceOfTweeters := make([]*domain.Tweeter, 0)
+	sliceOfTweets := make([]domain.Tweet, 0)
 
 	for _, usuario := range followed {
-		userTweeters := manager.GetTweetersByUser(usuario)
-		sliceOfTweeters = append(sliceOfTweeters, userTweeters...)
+		userTweets := manager.GetTweetsByUser(usuario)
+		sliceOfTweets = append(sliceOfTweets, userTweets...)
 		//copio y creo un array nuevo con lo que le agrego, LO TENGO QUE PEGAR AL VIEJO
 		//lospuntos suspensivos son para decirle "como esto es una lista , quiero todos los elementos"
 	}
 
-	sliceOfTweeters = append(sliceOfTweeters, manager.GetTweetersByUser(user)...) //los mios tambien aparecen
-	return sliceOfTweeters
+	sliceOfTweets = append(sliceOfTweets, manager.GetTweetsByUser(user)...) //los mios tambien aparecen
+	return sliceOfTweets
 }
 
-//GetTrendingTopic obtiene las dos palabras mas usadas en todos los Tweeters
-func (manager *TweeterManager) GetTrendingTopic() []string {
+//GetTrendingTopic obtiene las dos palabras mas usadas en todos los Tweets
+func (manager *TweetManager) GetTrendingTopic() []string {
 	firstTopic := ""
 	firstTopicCounter := 0
 	secondTopic := ""
@@ -204,57 +187,57 @@ func (manager *TweeterManager) GetTrendingTopic() []string {
 }
 
 //SendDirectMessage Envia un mensaje directo al usuario receptor
-func (manager *TweeterManager) SendDirectMessage(tweeter *domain.Tweeter, receiver string) {
-	manager.addTweeterToMapStringKey(&manager.allDirectMessages, tweeter, receiver)
-	manager.addTweeterToMapStringKey(&manager.unreadDirectMessages, tweeter, receiver)
+func (manager *TweetManager) SendDirectMessage(Tweet domain.Tweet, receiver string) {
+	manager.addTweetToMapStringKey(&manager.allDirectMessages, Tweet, receiver)
+	manager.addTweetToMapStringKey(&manager.unreadDirectMessages, Tweet, receiver)
 }
 
-func (manager *TweeterManager) addTweeterToMapStringKey(mapa *map[string][]*domain.Tweeter, Tweeter *domain.Tweeter, user string) {
-	TweeterList, _ := (*mapa)[user]
-	(*mapa)[user] = append(TweeterList, Tweeter)
+func (manager *TweetManager) addTweetToMapStringKey(mapa *map[string][]domain.Tweet, Tweet domain.Tweet, user string) {
+	TweetList, _ := (*mapa)[user]
+	(*mapa)[user] = append(TweetList, Tweet)
 }
 
 //GetAllDirectMessages obtiene todos los mensajes directos de un usuario
-func (manager *TweeterManager) GetAllDirectMessages(user string) []*domain.Tweeter {
+func (manager *TweetManager) GetAllDirectMessages(user string) []domain.Tweet {
 	return manager.allDirectMessages[user]
 }
 
 //GetUnreadDirectMessages obtiene los mensajes sin leer de un usuario
-func (manager *TweeterManager) GetUnreadDirectMessages(user string) []*domain.Tweeter {
+func (manager *TweetManager) GetUnreadDirectMessages(user string) []domain.Tweet {
 	return manager.unreadDirectMessages[user]
 }
 
 //ReadDirectMessage marca un mensaje como leido
-func (manager *TweeterManager) ReadDirectMessage(tweeter *domain.Tweeter, user string) {
+func (manager *TweetManager) ReadDirectMessage(Tweet domain.Tweet, user string) {
 	unreadDirectMessages, _ := manager.unreadDirectMessages[user]
 	for index, directMessage := range unreadDirectMessages {
-		if directMessage == tweeter {
+		if directMessage == Tweet {
 			manager.unreadDirectMessages[user] = append(unreadDirectMessages[:index], unreadDirectMessages[index+1:]...)
 		}
 	}
 }
 
-//ReTweeter hace que el Tweeter aparezca dentro de mis Tweeters
-func (manager *TweeterManager) ReTweeter(tweeter *domain.Tweeter, user string) {
-	manager.addTweeterToUser(tweeter, user)
+//ReTweet hace que el Tweet aparezca dentro de mis Tweets
+func (manager *TweetManager) ReTweet(Tweet domain.Tweet, user string) {
+	manager.addTweetToUser(Tweet, user)
 }
 
-func (manager *TweeterManager) addTweeterToUser(tweeter *domain.Tweeter, user string) {
-	manager.allTweeters[user] = append(manager.allTweeters[user], tweeter)
+func (manager *TweetManager) addTweetToUser(Tweet domain.Tweet, user string) {
+	manager.allTweets[user] = append(manager.allTweets[user], Tweet)
 }
 
-func (manager *TweeterManager) FavTweeter(tweeter *domain.Tweeter, user string) {
-	manager.addTweeterToMapStringKey(&manager.favTweetersByUser, tweeter, user)
+func (manager *TweetManager) FavTweet(Tweet domain.Tweet, user string) {
+	manager.addTweetToMapStringKey(&manager.favTweetsByUser, Tweet, user)
 }
 
-func (manager *TweeterManager) GetFavTweeters(user string) []*domain.Tweeter {
-	return manager.favTweetersByUser[user]
+func (manager *TweetManager) GetFavTweets(user string) []domain.Tweet {
+	return manager.favTweetsByUser[user]
 }
 
-func (manager *TweeterManager) AddPlugin(plugin *domain.TweetPlugin) {
+func (manager *TweetManager) AddPlugin(plugin domain.TweetPlugin) {
 	manager.pluginList = append(manager.pluginList, plugin)
 }
 
-func (manager *TweeterManager) GetPlugins() []*domain.TweetPlugin {
+func (manager *TweetManager) GetPlugins() []domain.TweetPlugin {
 	return manager.pluginList
 }

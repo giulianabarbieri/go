@@ -50,3 +50,19 @@ func (tweet *TextTweet) Id() int {
 func (tweet *TextTweet) Date() *time.Time {
 	return tweet.DateAtr
 }
+
+func (tweet *TextTweet) GetId() int {
+	return tweet.Id()
+}
+
+func (tweet *TextTweet) GetUser() string {
+	return tweet.User()
+}
+
+func (tweet *TextTweet) GetDate() *time.Time {
+	return tweet.Date()
+}
+
+func (tweet *TextTweet) GetText() string {
+	return tweet.Text()
+}
