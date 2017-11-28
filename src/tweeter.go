@@ -5,6 +5,7 @@ import (
 
 	"github.com/abiosoft/ishell"
 	"github.com/go/src/domain"
+	"github.com/go/src/rest"
 	"github.com/go/src/service"
 )
 
@@ -12,9 +13,13 @@ func main() {
 	shell := ishell.New() //new de la libreria
 	shell.SetPrompt("Tweeter >>")
 	shell.Print("Type 'help' to know commands \n")
+
 	memoryTweetWriter := service.NewMemoryTweetWriter()
 	tweetWriter := service.NewChannelTweetWriter(memoryTweetWriter)
 	tweetManager := service.NewTweetManager(tweetWriter)
+
+	ginServer := rest.NewGinServer(&tweetManager)
+	ginServer.StartGinServer()
 
 	//PublishTextTweet
 	shell.AddCmd(&ishell.Cmd{
